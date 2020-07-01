@@ -1,0 +1,39 @@
+https://www.sqlitetutorial.net/sqlite-java/
+
+note to self: Forget about CSVParse. Simply parse the CSV files and build the record objects, line by line
+using quotes to denote the records. Store as array, and extract values 
+
+database construct:
+
+datetime | destination  | number | minutes | direction |  type   
+             Incoming                         incoming    Picture       
+             Rockville, MD                    outgoing    Text
+                                                          wifi
+                                                          call             
+
+Messages:
+date, time, destination, number, direction, text type
+
+Calls:
+date, time, destination, number, minutes, call type
+
+
+1. dirCheck() check directory for csv files.
+
+2. parseCSV() goes over csv file
+	looks for line #3
+	 if "messaging charges" is found, begin on line 8
+	  and pick up date, time, destination, number, direction, text type
+
+		2b. fixMessageTime() shifts all time stamps to 3 hours forward to match EST.
+	  
+3. convertToDateTime() takes date and time and creates a singular datetime ISO8601 value. 
+	  
+4. if "local airtime" is found, begin on line 9
+   and pick up date, time, destination, number, minutes, call type 
+	 
+5. writeToDB() 
+     write 5 fields depending on type of file parsed (message or call)
+
+6. repeat.
+     
