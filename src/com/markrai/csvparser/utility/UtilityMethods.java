@@ -31,7 +31,7 @@ public class UtilityMethods {
 	// converts date and time Strings into unified ISO8601 LocalDateTime object.
 	public static LocalDateTime createDateTime(String date, String time) throws ParseException {
 		String dateTimeString = date + " " + time;
-		DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a");
+		DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("MM/d/yyyy hh:mm a");
 		LocalDateTime ldt = LocalDateTime.parse(dateTimeString, dateTimeFormat);
 		return ldt;
 

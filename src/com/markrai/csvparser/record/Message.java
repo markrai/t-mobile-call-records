@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 public class Message {
 
 	LocalDateTime dateTime;
-
 	String destination;
 	String number;
 	String direction;

@@ -17,8 +17,8 @@ public class DBWriter {
 	public static Connection connect() {
 		try {
 			c = DriverManager.getConnection("jdbc:sqlite:" + route);
-			if (c != null)
-				System.out.println("Connected to db.");
+			// if (c != null)
+			// System.out.println("Connected to db.");
 		} catch (SQLException ex) {
 			System.err.println("Couldn't connect." + ex.getMessage());
 		}
@@ -40,24 +40,24 @@ public class DBWriter {
 
 	public int insertCall(LocalDateTime dateTime, String destination, String number, int minutes, String type) {
 		int numRowsInserted = 0;
-		PreparedStatement ps = null;
+		PreparedStatement psc = null;
 		try {
-			ps = this.connection.prepareStatement(INSERT_CALL);
+			psc = this.connection.prepareStatement(INSERT_CALL);
 
-			ps.setString(1, dateTime.toString());
-			ps.setString(2, destination);
-			ps.setString(3, number);
-			ps.setInt(4, minutes);
-			ps.setString(5, type);
+			psc.setString(1, dateTime.toString());
+			psc.setString(2, destination);
+			psc.setString(3, number);
+			psc.setInt(4, minutes);
+			psc.setString(5, type);
 
-			numRowsInserted = ps.executeUpdate();
+			numRowsInserted = psc.executeUpdate();
 
 		} catch (SQLException e) {
 
 			e.printStackTrace();
 		} finally {
 
-			close(ps);
+			close(psc);
 		}
 
 		return numRowsInserted;
@@ -65,24 +65,24 @@ public class DBWriter {
 
 	public int insertMessage(LocalDateTime dateTime, String destination, String number, String direction, String type) {
 		int numRowsInserted = 0;
-		PreparedStatement ps = null;
+		PreparedStatement psm = null;
 		try {
-			ps = this.connection.prepareStatement(INSERT_CALL);
+			psm = this.connection.prepareStatement(INSERT_MESSAGE);
 
-			ps.setString(1, dateTime.toString());
-			ps.setString(2, destination);
-			ps.setString(3, number);
-			ps.setString(4, direction);
-			ps.setString(5, type);
+			psm.setString(1, dateTime.toString());
+			psm.setString(2, destination);
+			psm.setString(3, number);
+			psm.setString(4, direction);
+			psm.setString(5, type);
 
-			numRowsInserted = ps.executeUpdate();
+			numRowsInserted = psm.executeUpdate();
 
 		} catch (SQLException e) {
 
 			e.printStackTrace();
 		} finally {
 
-			close(ps);
+			close(psm);
 		}
 
 		return numRowsInserted;

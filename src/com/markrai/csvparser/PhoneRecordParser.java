@@ -30,14 +30,12 @@ public class PhoneRecordParser {
 
 			if (line.contains("MESSAGING CHARGES")) {
 
-				System.out.println("Parsing Messages...");
 				parseMessages(csvData);
 				br.close();
 				break;
 
 			} else if ((line.contains("LOCAL AIRTIME"))) {
 
-				System.out.println("Parsing Calls...");
 				parseCalls(csvData);
 				br.close();
 				break;
@@ -72,18 +70,18 @@ public class PhoneRecordParser {
 			}
 		}
 
-		System.out.println("Completed Parsing Calls...");
+		// System.out.println("Completed Parsing Calls...");
 		callData.close();
 		csvReader.close();
-		
+
 		DBWriter dbw = new DBWriter(DBWriter.connect());
 
 		for (Call c : callList) {
 
 			dbw.insertCall(c.getDateTime(), c.getDestination(), c.getNumber(), c.getMinutes(), c.getCallType());
-			System.out.println("Writing record to db for:" + c.getDateTime());
+			// System.out.println("Writing record to db for:" + c.getDateTime());
 		}
-		System.out.println("Finished writing to DB!");
+		// System.out.println("Finished writing to DB!");
 
 		return callList;
 	}
@@ -115,7 +113,7 @@ public class PhoneRecordParser {
 
 		}
 
-		System.out.println("Completed Parsing Messages...");
+		// System.out.println("Completed Parsing Messages...");
 		messageData.close();
 		csvReader.close();
 
@@ -124,9 +122,9 @@ public class PhoneRecordParser {
 		for (Message m : messageList) {
 
 			dbw.insertMessage(m.getDateTime(), m.getDestination(), m.getNumber(), m.getDirection(), m.getTextType());
-			System.out.println("Writing record to db for:" + m.getDateTime());
+			// System.out.println("Writing record to db for:" + m.getDateTime());
 		}
-		System.out.println("Finished writing to DB!");
+		// System.out.println("Finished writing to DB!");
 		return messageList;
 
 	}

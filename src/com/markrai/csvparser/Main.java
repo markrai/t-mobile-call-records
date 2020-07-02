@@ -9,6 +9,8 @@ import com.markrai.csvparser.utility.UtilityMethods;
 
 public class Main {
 
+	static int counter = 0;
+
 	public static void main(String[] args) throws Exception {
 
 		List<File> allFiles;
@@ -16,16 +18,21 @@ public class Main {
 
 		for (File f : allFiles) {
 
+			counter++;
+
 			PhoneRecordParser.fileBeingProcessed = f.toString();
 
 			BufferedReader objReader = new BufferedReader(new FileReader(PhoneRecordParser.fileBeingProcessed));
 
 			PhoneRecordParser prd = new PhoneRecordParser();
+			System.out.println("Processing:" + f);
 			prd.determineFileType(objReader);
+			System.out.println("Completed: " + f);
+			System.out.println();
 
 		}
 
-		System.out.println("All Files Processed!");
+		System.out.println(counter+ " CSV file(s) Processed!");
 
 	}
 
