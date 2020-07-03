@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.markrai.csvparser.record.Call;
 import com.markrai.csvparser.record.Message;
@@ -18,8 +20,19 @@ import com.opencsv.CSVReaderBuilder;
 
 public class PhoneRecordParser {
 
+	Map<String, String> numbersAndNames = new HashMap<String, String>();
+
+	public PhoneRecordParser() {
+
+		// obtain mapping of recognized numbers
+		DBWriter dbw = new DBWriter(DBWriter.connect());
+		numbersAndNames = dbw.fetchNames();
+
+	}
+
 	public static String fileBeingProcessed;
 
+	// determine whether file is call data, or messaging data
 	void determineFileType(Reader csvData) throws Exception {
 
 		BufferedReader br = new BufferedReader(new FileReader(fileBeingProcessed));
@@ -58,7 +71,14 @@ public class PhoneRecordParser {
 			line = csvReader.readNext();
 
 			if (i < lengthOfFile - 10) {
+
 				Call call = new Call();
+
+				if (numbersAndNames.containsKey(line[3])) {
+
+					call.setName(numbersAndNames.get(line[3]));
+
+				}
 
 				call.setDateTime(UtilityMethods.createDateTime(line[0], line[1]));
 				call.setDestination(line[2]);
@@ -78,7 +98,8 @@ public class PhoneRecordParser {
 
 		for (Call c : callList) {
 
-			dbw.insertCall(c.getDateTime(), c.getDestination(), c.getNumber(), c.getMinutes(), c.getCallType());
+			dbw.insertCall(c.getDateTime(), c.getDestination(), c.getNumber(), c.getMinutes(), c.getCallType(),
+					c.getName());
 			// System.out.println("Writing record to db for:" + c.getDateTime());
 		}
 		// System.out.println("Finished writing to DB!");

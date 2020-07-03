@@ -3,10 +3,12 @@ package com.markrai.csvparser.sqlite;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DBWriter {
 	String statement = null;
@@ -35,10 +37,12 @@ public class DBWriter {
 
 	}
 
-	private static final String INSERT_CALL = "INSERT INTO Records(datetime, destination, number, minutes, type) VALUES(?, ?, ?, ?, ?)";
+	private static final String INSERT_CALL = "INSERT INTO Records(datetime, destination, number, minutes, type, name) VALUES(?, ?, ?, ?, ?, ?)";
 	private static final String INSERT_MESSAGE = "INSERT INTO Records(datetime, destination, number, direction, type) VALUES(?, ?, ?, ?, ?)";
+	private static final String FETCH_NAMES = "SELECT * FROM Names";
 
-	public int insertCall(LocalDateTime dateTime, String destination, String number, int minutes, String type) {
+	public int insertCall(LocalDateTime dateTime, String destination, String number, int minutes, String type,
+			String name) {
 		int numRowsInserted = 0;
 		PreparedStatement psc = null;
 		try {
@@ -49,6 +53,7 @@ public class DBWriter {
 			psc.setString(3, number);
 			psc.setInt(4, minutes);
 			psc.setString(5, type);
+			psc.setString(6, name);
 
 			numRowsInserted = psc.executeUpdate();
 
@@ -86,6 +91,35 @@ public class DBWriter {
 		}
 
 		return numRowsInserted;
+	}
+
+	public Map<String, String> fetchNames() {
+
+		Map<String, String> names = new HashMap<String, String>();
+
+		PreparedStatement pfn = null;
+
+		try {
+
+			pfn = this.connection.prepareStatement(FETCH_NAMES);
+
+			ResultSet rs = pfn.executeQuery();
+
+			while (rs.next()) {
+
+				names.put((rs.getString("number")), (rs.getString("name")));
+
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+
+		} finally {
+			close(pfn);
+		}
+
+		return names;
+
 	}
 
 	public static void close(Statement statement) {

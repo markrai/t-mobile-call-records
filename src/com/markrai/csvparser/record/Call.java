@@ -8,6 +8,8 @@ public class Call {
 	String destination;
 	String number;
 	int minutes;
+	String name;
+	
 	String callType;
 	
 	public LocalDateTime getDateTime() {
@@ -40,5 +42,12 @@ public class Call {
 	public void setCallType(String callType) {
 		this.callType = callType;
 	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 
 }

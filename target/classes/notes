@@ -1,4 +1,20 @@
-Resources:
+DDL for DB:
 
-https://stackoverflow.com/questions/37714254/java-how-can-i-insert-values-in-sqlite
-https://www.sqlitetutorial.net/sqlite-java/     
+-- records definition
+
+CREATE TABLE records (
+	datetime TEXT,
+	destination TEXT,
+	"number" TEXT,
+	minutes INTEGER,
+	direction TEXT,
+	"type" TEXT
+, name TEXT);
+
+
+-- names definition
+
+CREATE TABLE names (
+	"number" TEXT,
+	name TEXT
+);

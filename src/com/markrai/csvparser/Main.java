@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 
+import com.markrai.csvparser.sqlite.DBWriter;
 import com.markrai.csvparser.utility.UtilityMethods;
 
 public class Main {
@@ -13,6 +14,8 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
+		PhoneRecordParser prd = new PhoneRecordParser();
+		
 		List<File> allFiles;
 		allFiles = UtilityMethods.getAllFiles();
 
@@ -24,7 +27,7 @@ public class Main {
 
 			BufferedReader objReader = new BufferedReader(new FileReader(PhoneRecordParser.fileBeingProcessed));
 
-			PhoneRecordParser prd = new PhoneRecordParser();
+			
 			System.out.println("Processing:" + f);
 			prd.determineFileType(objReader);
 			System.out.println("Completed: " + f);
@@ -32,7 +35,7 @@ public class Main {
 
 		}
 
-		System.out.println(counter+ " CSV file(s) Processed!");
+		System.out.println(counter + " CSV file(s) Processed!");
 
 	}
 
