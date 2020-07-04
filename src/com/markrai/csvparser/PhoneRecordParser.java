@@ -100,9 +100,8 @@ public class PhoneRecordParser {
 
 			dbw.insertCall(c.getDateTime(), c.getDestination(), c.getNumber(), c.getMinutes(), c.getCallType(),
 					c.getName());
-			// System.out.println("Writing record to db for:" + c.getDateTime());
+
 		}
-		// System.out.println("Finished writing to DB!");
 
 		return callList;
 	}
@@ -122,6 +121,12 @@ public class PhoneRecordParser {
 			if (i < lengthOfFile - 10) {
 				Message message = new Message();
 
+				if (numbersAndNames.containsKey(line[3])) {
+
+					message.setName(numbersAndNames.get(line[3]));
+
+				}
+
 				LocalDateTime dateTime = UtilityMethods.fixMessageTime(UtilityMethods.createDateTime(line[0], line[1]));
 
 				message.setDateTime(dateTime);
@@ -129,6 +134,7 @@ public class PhoneRecordParser {
 				message.setNumber(line[3]);
 				message.setDirection(line[4]);
 				message.setTextType(line[5]);
+
 				messageList.add(message);
 			}
 
@@ -142,10 +148,11 @@ public class PhoneRecordParser {
 
 		for (Message m : messageList) {
 
-			dbw.insertMessage(m.getDateTime(), m.getDestination(), m.getNumber(), m.getDirection(), m.getTextType());
-			// System.out.println("Writing record to db for:" + m.getDateTime());
+			dbw.insertMessage(m.getDateTime(), m.getDestination(), m.getNumber(), m.getDirection(), m.getTextType(),
+					m.getName());
+			
 		}
-		// System.out.println("Finished writing to DB!");
+
 		return messageList;
 
 	}

@@ -38,7 +38,7 @@ public class DBWriter {
 	}
 
 	private static final String INSERT_CALL = "INSERT INTO Records(datetime, destination, number, minutes, type, name) VALUES(?, ?, ?, ?, ?, ?)";
-	private static final String INSERT_MESSAGE = "INSERT INTO Records(datetime, destination, number, direction, type) VALUES(?, ?, ?, ?, ?)";
+	private static final String INSERT_MESSAGE = "INSERT INTO Records(datetime, destination, number, direction, type, name) VALUES(?, ?, ?, ?, ?, ?)";
 	private static final String FETCH_NAMES = "SELECT * FROM Names";
 
 	public int insertCall(LocalDateTime dateTime, String destination, String number, int minutes, String type,
@@ -68,7 +68,7 @@ public class DBWriter {
 		return numRowsInserted;
 	}
 
-	public int insertMessage(LocalDateTime dateTime, String destination, String number, String direction, String type) {
+	public int insertMessage(LocalDateTime dateTime, String destination, String number, String direction, String type, String name) {
 		int numRowsInserted = 0;
 		PreparedStatement psm = null;
 		try {
@@ -79,6 +79,7 @@ public class DBWriter {
 			psm.setString(3, number);
 			psm.setString(4, direction);
 			psm.setString(5, type);
+			psm.setString(6, name);
 
 			numRowsInserted = psm.executeUpdate();
 
