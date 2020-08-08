@@ -1,15 +1,4 @@
-
-package com.markrai.csvparser;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Reader;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+package com.markrai.csvparser.experimental;
 
 import com.markrai.csvparser.record.Call;
 import com.markrai.csvparser.record.Message;
@@ -20,26 +9,51 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.sql.PreparedStatement;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class PhoneRecordParser {
 
-    Map<String, String> numbersAndNames;
+    static String fileBeingProcessed;
+    static Map<String, String> numbersAndNames;
+    static List<Call> callList = new ArrayList<>();
+    static List<Message> messageList = new ArrayList<>();
 
-    public PhoneRecordParser() throws SQLException {
+    public static void main(String[] args) throws Exception {
+
+        Map<String, String> numbersAndNames;
 
         // obtain mapping of recognized numbers
         DBWriter dbw = new DBWriter(DBWriter.connect());
         numbersAndNames = dbw.fetchNames();
 
+        // delete all existing records
         PreparedStatement psc = dbw.getConnection().prepareStatement("DELETE from records;");
         System.out.println("Deleting all records");
         psc.executeUpdate();
 
+        // get list of all files
+        List<File> allFiles = UtilityMethods.getAllFiles();
+
+        // go over each file one by one
+        for (File f : allFiles) {
+
+            com.markrai.csvparser.experimental.PhoneRecordParser.fileBeingProcessed = f.toString();
+            BufferedReader objReader = new BufferedReader(new FileReader(com.markrai.csvparser.experimental.PhoneRecordParser.fileBeingProcessed));
+            determineFileType(objReader);
+
+        }
+
     }
 
-    public static String fileBeingProcessed;
-
-    // determine whether file is call data, or messaging data
-    void determineFileType(Reader csvData) throws Exception {
+    static void determineFileType(Reader csvData) throws Exception {
 
         BufferedReader br = new BufferedReader(new FileReader(fileBeingProcessed));
 
@@ -64,10 +78,10 @@ public class PhoneRecordParser {
 
     }
 
-    private void parseCalls(Reader callData) throws Exception {
+
+    private static void parseCalls(Reader callData) throws Exception {
 
         int lengthOfFile = (UtilityMethods.getNumberOfLines(fileBeingProcessed));
-        List<Call> callList = new ArrayList<>();
         CSVParser parser = new CSVParserBuilder().withSeparator(',').withIgnoreQuotations(false).build();
         CSVReader csvReader = new CSVReaderBuilder(callData).withSkipLines(8).withCSVParser(parser).build();
         String[] line;
@@ -99,21 +113,13 @@ public class PhoneRecordParser {
         callData.close();
         csvReader.close();
 
-        DBWriter dbw = new DBWriter(DBWriter.connect());
-
-        for (Call c : callList) {
-
-            dbw.insertCall(c.getDateTime(), c.getDestination(), c.getNumber(), c.getMinutes(), c.getCallType(),
-                    c.getName());
-
-        }
-
     }
 
-    public void parseMessages(Reader messageData) throws Exception {
+
+    public static void parseMessages(Reader messageData) throws Exception {
 
         int lengthOfFile = (UtilityMethods.getNumberOfLines(fileBeingProcessed));
-        List<Message> messageList = new ArrayList<>();
+
         CSVParser parser = new CSVParserBuilder().withSeparator(',').withIgnoreQuotations(false).build();
         CSVReader csvReader = new CSVReaderBuilder(messageData).withSkipLines(8).withCSVParser(parser).build();
         String[] line;
@@ -147,14 +153,8 @@ public class PhoneRecordParser {
         messageData.close();
         csvReader.close();
 
-        DBWriter dbw = new DBWriter(DBWriter.connect());
-
-        for (Message m : messageList) {
-
-            dbw.insertMessage(m.getDateTime(), m.getDestination(), m.getNumber(), m.getDirection(), m.getTextType(),
-                    m.getName());
-
-        }
-
     }
+
 }
+
+

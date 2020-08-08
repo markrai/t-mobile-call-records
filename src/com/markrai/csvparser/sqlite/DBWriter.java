@@ -14,7 +14,6 @@ import java.util.Map;
 
 public class DBWriter {
 
-
     static java.sql.Connection c = null;
 
     public static Connection connect() {
