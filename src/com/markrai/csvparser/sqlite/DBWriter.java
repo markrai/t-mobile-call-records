@@ -1,5 +1,7 @@
 package com.markrai.csvparser.sqlite;
 
+import com.markrai.csvparser.Configuration;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,126 +13,125 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DBWriter {
-	String statement = null;
 
-	static String route = "C:\\dev\\db\\mysqlitedb.db";
-	static java.sql.Connection c = null;
 
-	public static Connection connect() {
-		try {
-			c = DriverManager.getConnection("jdbc:sqlite:" + route);
-			// if (c != null)
-			// System.out.println("Connected to db.");
-		} catch (SQLException ex) {
-			System.err.println("Couldn't connect." + ex.getMessage());
-		}
-		return c;
-	}
+    static java.sql.Connection c = null;
 
-	private Connection connection;
+    public static Connection connect() {
+        try {
+            c = DriverManager.getConnection("jdbc:sqlite:" + Configuration.DB_LOCATION);
 
-	public DBWriter(Connection connection) {
-		this.connection = connection;
-	}
+        } catch (SQLException ex) {
+            System.err.println("Couldn't connect." + ex.getMessage());
+        }
+        return c;
+    }
 
-	public DBWriter() {
+    public Connection getConnection() {
+        return connection;
+    }
 
-	}
+    private final Connection connection;
 
-	private static final String INSERT_CALL = "INSERT INTO Records(datetime, destination, number, minutes, type, name) VALUES(?, ?, ?, ?, ?, ?)";
-	private static final String INSERT_MESSAGE = "INSERT INTO Records(datetime, destination, number, direction, type, name) VALUES(?, ?, ?, ?, ?, ?)";
-	private static final String FETCH_NAMES = "SELECT * FROM Names";
+    public DBWriter(Connection connection) {
+        this.connection = connection;
+    }
 
-	public int insertCall(LocalDateTime dateTime, String destination, String number, int minutes, String type,
-			String name) {
-		int numRowsInserted = 0;
-		PreparedStatement psc = null;
-		try {
-			psc = this.connection.prepareStatement(INSERT_CALL);
+    private static final String INSERT_CALL = "INSERT INTO Records(datetime, destination, number, minutes, type, name) VALUES(?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_MESSAGE = "INSERT INTO Records(datetime, destination, number, direction, type, name) VALUES(?, ?, ?, ?, ?, ?)";
+    private static final String FETCH_NAMES = "SELECT * FROM Names";
 
-			psc.setString(1, dateTime.toString());
-			psc.setString(2, destination);
-			psc.setString(3, number);
-			psc.setInt(4, minutes);
-			psc.setString(5, type);
-			psc.setString(6, name);
+    public int insertCall(LocalDateTime dateTime, String destination, String number, int minutes, String type,
+                          String name) {
+        int numRowsInserted = 0;
+        PreparedStatement psc = null;
+        try {
+            psc = this.connection.prepareStatement(INSERT_CALL);
 
-			numRowsInserted = psc.executeUpdate();
+            psc.setString(1, dateTime.toString());
+            psc.setString(2, destination);
+            psc.setString(3, number);
+            psc.setInt(4, minutes);
+            psc.setString(5, type);
+            psc.setString(6, name);
 
-		} catch (SQLException e) {
+            numRowsInserted = psc.executeUpdate();
 
-			e.printStackTrace();
-		} finally {
+        } catch (SQLException e) {
 
-			close(psc);
-		}
+            e.printStackTrace();
+        } finally {
 
-		return numRowsInserted;
-	}
+            close(psc);
+        }
 
-	public int insertMessage(LocalDateTime dateTime, String destination, String number, String direction, String type, String name) {
-		int numRowsInserted = 0;
-		PreparedStatement psm = null;
-		try {
-			psm = this.connection.prepareStatement(INSERT_MESSAGE);
+        return numRowsInserted;
+    }
 
-			psm.setString(1, dateTime.toString());
-			psm.setString(2, destination);
-			psm.setString(3, number);
-			psm.setString(4, direction);
-			psm.setString(5, type);
-			psm.setString(6, name);
+    public int insertMessage(LocalDateTime dateTime, String destination, String number, String direction, String type, String name) {
+        int numRowsInserted = 0;
+        PreparedStatement psm = null;
+        try {
+            psm = this.connection.prepareStatement(INSERT_MESSAGE);
 
-			numRowsInserted = psm.executeUpdate();
+            psm.setString(1, dateTime.toString());
+            psm.setString(2, destination);
+            psm.setString(3, number);
+            psm.setString(4, direction);
+            psm.setString(5, type);
+            psm.setString(6, name);
 
-		} catch (SQLException e) {
+            numRowsInserted = psm.executeUpdate();
 
-			e.printStackTrace();
-		} finally {
+        } catch (SQLException e) {
 
-			close(psm);
-		}
+            e.printStackTrace();
+        } finally {
 
-		return numRowsInserted;
-	}
+            close(psm);
+        }
 
-	public Map<String, String> fetchNames() {
+        return numRowsInserted;
+    }
 
-		Map<String, String> names = new HashMap<String, String>();
+    public Map<String, String> fetchNames() {
 
-		PreparedStatement pfn = null;
+        Map<String, String> names = new HashMap<>();
 
-		try {
+        PreparedStatement pfn = null;
 
-			pfn = this.connection.prepareStatement(FETCH_NAMES);
+        try {
 
-			ResultSet rs = pfn.executeQuery();
+            pfn = this.connection.prepareStatement(FETCH_NAMES);
 
-			while (rs.next()) {
+            ResultSet rs = pfn.executeQuery();
 
-				names.put((rs.getString("number")), (rs.getString("name")));
+            while (rs.next()) {
 
-			}
+                names.put((rs.getString("number")), (rs.getString("name")));
 
-		} catch (SQLException e) {
-			e.printStackTrace();
+            }
 
-		} finally {
-			close(pfn);
-		}
+        } catch (SQLException e) {
+            e.printStackTrace();
 
-		return names;
+        } finally {
+            close(pfn);
+        }
 
-	}
+        return names;
 
-	public static void close(Statement statement) {
-		try {
-			if (statement != null) {
-				statement.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+    }
+
+    public static void close(Statement statement) {
+        try {
+            if (statement != null) {
+                statement.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

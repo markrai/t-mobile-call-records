@@ -1,11 +1,13 @@
+
 package com.markrai.csvparser;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,140 +22,140 @@ import com.opencsv.CSVReaderBuilder;
 
 public class PhoneRecordParser {
 
-	Map<String, String> numbersAndNames = new HashMap<String, String>();
+    Map<String, String> numbersAndNames;
 
-	public PhoneRecordParser() {
+    public PhoneRecordParser() throws SQLException {
 
-		// obtain mapping of recognized numbers
-		DBWriter dbw = new DBWriter(DBWriter.connect());
-		numbersAndNames = dbw.fetchNames();
+        // obtain mapping of recognized numbers
+        DBWriter dbw = new DBWriter(DBWriter.connect());
+        numbersAndNames = dbw.fetchNames();
 
-	}
+        PreparedStatement psc = dbw.getConnection().prepareStatement("DELETE from records;");
+        System.out.println("Deleting all records");
+        psc.executeUpdate();
 
-	public static String fileBeingProcessed;
+    }
 
-	// determine whether file is call data, or messaging data
-	void determineFileType(Reader csvData) throws Exception {
+    public static String fileBeingProcessed;
 
-		BufferedReader br = new BufferedReader(new FileReader(fileBeingProcessed));
+    // determine whether file is call data, or messaging data
+    void determineFileType(Reader csvData) throws Exception {
 
-		String line = br.readLine();
+        BufferedReader br = new BufferedReader(new FileReader(fileBeingProcessed));
 
-		while ((line = br.readLine()) != null) {
+        String line;
 
-			if (line.contains("MESSAGING CHARGES")) {
+        while ((line = br.readLine()) != null) {
 
-				parseMessages(csvData);
-				br.close();
-				break;
+            if (line.contains("MESSAGING CHARGES")) {
 
-			} else if ((line.contains("LOCAL AIRTIME"))) {
+                parseMessages(csvData);
+                br.close();
+                break;
 
-				parseCalls(csvData);
-				br.close();
-				break;
-			}
+            } else if ((line.contains("LOCAL AIRTIME"))) {
 
-		}
+                parseCalls(csvData);
+                br.close();
+                break;
+            }
 
-	}
+        }
 
-	private List<Call> parseCalls(Reader callData) throws Exception {
+    }
 
-		int lengthOfFile = (UtilityMethods.getNumberOfLines(fileBeingProcessed));
-		List<Call> callList = new ArrayList<>();
-		CSVParser parser = new CSVParserBuilder().withSeparator(',').withIgnoreQuotations(false).build();
-		CSVReader csvReader = new CSVReaderBuilder(callData).withSkipLines(8).withCSVParser(parser).build();
-		String[] line;
+    private void parseCalls(Reader callData) throws Exception {
 
-		for (int i = 0; i < lengthOfFile; i++) {
+        int lengthOfFile = (UtilityMethods.getNumberOfLines(fileBeingProcessed));
+        List<Call> callList = new ArrayList<>();
+        CSVParser parser = new CSVParserBuilder().withSeparator(',').withIgnoreQuotations(false).build();
+        CSVReader csvReader = new CSVReaderBuilder(callData).withSkipLines(8).withCSVParser(parser).build();
+        String[] line;
 
-			line = csvReader.readNext();
+        for (int i = 0; i < lengthOfFile; i++) {
 
-			if (i < lengthOfFile - 10) {
+            line = csvReader.readNext();
 
-				Call call = new Call();
+            if (i < lengthOfFile - 10) {
 
-				if (numbersAndNames.containsKey(line[3])) {
+                Call call = new Call();
 
-					call.setName(numbersAndNames.get(line[3]));
+                if (numbersAndNames.containsKey(line[3])) {
 
-				}
+                    call.setName(numbersAndNames.get(line[3]));
 
-				call.setDateTime(UtilityMethods.createDateTime(line[0], line[1]));
-				call.setDestination(line[2]);
-				call.setNumber(line[3]);
-				call.setMinutes(UtilityMethods.convertToMinutes(line[4]));
-				call.setCallType(line[5]);
+                }
 
-				callList.add(call);
-			}
-		}
+                call.setDateTime(UtilityMethods.createDateTime(line[0], line[1]));
+                call.setDestination(line[2]);
+                call.setNumber(line[3]);
+                call.setMinutes(UtilityMethods.convertToMinutes(line[4]));
+                call.setCallType(line[5]);
 
-		// System.out.println("Completed Parsing Calls...");
-		callData.close();
-		csvReader.close();
+                callList.add(call);
+            }
+        }
 
-		DBWriter dbw = new DBWriter(DBWriter.connect());
+        callData.close();
+        csvReader.close();
 
-		for (Call c : callList) {
+        DBWriter dbw = new DBWriter(DBWriter.connect());
 
-			dbw.insertCall(c.getDateTime(), c.getDestination(), c.getNumber(), c.getMinutes(), c.getCallType(),
-					c.getName());
+        for (Call c : callList) {
 
-		}
+            dbw.insertCall(c.getDateTime(), c.getDestination(), c.getNumber(), c.getMinutes(), c.getCallType(),
+                    c.getName());
 
-		return callList;
-	}
+        }
 
-	public List<Message> parseMessages(Reader messageData) throws Exception {
+    }
 
-		int lengthOfFile = (UtilityMethods.getNumberOfLines(fileBeingProcessed));
-		List<Message> messageList = new ArrayList<>();
-		CSVParser parser = new CSVParserBuilder().withSeparator(',').withIgnoreQuotations(false).build();
-		CSVReader csvReader = new CSVReaderBuilder(messageData).withSkipLines(8).withCSVParser(parser).build();
-		String[] line;
+    public void parseMessages(Reader messageData) throws Exception {
 
-		for (int i = 0; i < lengthOfFile; i++) {
+        int lengthOfFile = (UtilityMethods.getNumberOfLines(fileBeingProcessed));
+        List<Message> messageList = new ArrayList<>();
+        CSVParser parser = new CSVParserBuilder().withSeparator(',').withIgnoreQuotations(false).build();
+        CSVReader csvReader = new CSVReaderBuilder(messageData).withSkipLines(8).withCSVParser(parser).build();
+        String[] line;
 
-			line = csvReader.readNext();
+        for (int i = 0; i < lengthOfFile; i++) {
 
-			if (i < lengthOfFile - 10) {
-				Message message = new Message();
+            line = csvReader.readNext();
 
-				if (numbersAndNames.containsKey(line[3])) {
+            if (i < lengthOfFile - 10) {
+                Message message = new Message();
 
-					message.setName(numbersAndNames.get(line[3]));
+                if (numbersAndNames.containsKey(line[3])) {
 
-				}
+                    message.setName(numbersAndNames.get(line[3]));
 
-				LocalDateTime dateTime = UtilityMethods.fixMessageTime(UtilityMethods.createDateTime(line[0], line[1]));
+                }
 
-				message.setDateTime(dateTime);
-				message.setDestination(line[2]);
-				message.setNumber(line[3]);
-				message.setDirection(line[4]);
-				message.setTextType(line[5]);
+                LocalDateTime dateTime = UtilityMethods.fixMessageTime(UtilityMethods.createDateTime(line[0], line[1]));
 
-				messageList.add(message);
-			}
+                message.setDateTime(dateTime);
+                message.setDestination(line[2]);
+                message.setNumber(line[3]);
+                message.setDirection(line[4]);
+                message.setTextType(line[5]);
 
-		}
+                messageList.add(message);
+            }
 
-		// System.out.println("Completed Parsing Messages...");
-		messageData.close();
-		csvReader.close();
+        }
 
-		DBWriter dbw = new DBWriter(DBWriter.connect());
+        // System.out.println("Completed Parsing Messages...");
+        messageData.close();
+        csvReader.close();
 
-		for (Message m : messageList) {
+        DBWriter dbw = new DBWriter(DBWriter.connect());
 
-			dbw.insertMessage(m.getDateTime(), m.getDestination(), m.getNumber(), m.getDirection(), m.getTextType(),
-					m.getName());
-			
-		}
+        for (Message m : messageList) {
 
-		return messageList;
+            dbw.insertMessage(m.getDateTime(), m.getDestination(), m.getNumber(), m.getDirection(), m.getTextType(),
+                    m.getName());
 
-	}
+        }
+
+    }
 }

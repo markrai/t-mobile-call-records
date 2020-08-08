@@ -1,5 +1,7 @@
 package com.markrai.csvparser.utility;
 
+import com.markrai.csvparser.Configuration;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -32,8 +34,7 @@ public class UtilityMethods {
 	public static LocalDateTime createDateTime(String date, String time) throws ParseException {
 		String dateTimeString = date + " " + time;
 		DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("MM/d/yyyy hh:mm a");
-		LocalDateTime ldt = LocalDateTime.parse(dateTimeString, dateTimeFormat);
-		return ldt;
+		return LocalDateTime.parse(dateTimeString, dateTimeFormat);
 
 	}
 
@@ -60,10 +61,8 @@ public class UtilityMethods {
 	// fetches all files from directory
 	public static List<File> getAllFiles() throws IOException {
 
-		List<File> filesInFolder = Files.walk(Paths.get("/temp/records")).filter(Files::isRegularFile).map(Path::toFile)
+		return Files.walk(Paths.get(Configuration.RECORDS_LOCATION)).filter(Files::isRegularFile).map(Path::toFile)
 				.collect(Collectors.toList());
-		
-		return filesInFolder;
 	}
 
 }

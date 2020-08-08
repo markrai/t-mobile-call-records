@@ -18,3 +18,39 @@ CREATE TABLE names (
 	"number" TEXT,
 	name TEXT
 );
+
+
+Useful SQL Queries:
+
+SELECT * FROM records ORDER BY datetime desc;
+
+/* LONGEST PHONE CALLS: */
+SELECT * FROM records
+ORDER BY minutes DESC
+LIMIT 200;
+
+/* MOST CONTACTED NUMBER */
+SELECT number,name, count(*) as times_contacted FROM records
+GROUP BY number
+ORDER BY times_contacted
+DESC;
+
+/* ALL CONTACTS TO A SPECIFIC # */
+SELECT * FROM records WHERE number LIKE '(999) 999-9999';
+
+/* INSERT INTO NAMES TABLE */
+INSERT into names (number, name) values ('(999) 999-9999', 'John Doe');
+
+/* RESET RECORDS TABLE */
+delete from records;
+
+/* LOOKUP TABLE FOR NAMES */
+select * from names ORDER by name;
+
+UPDATE records
+SET name = 'John Doe'
+WHERE number is '(999) 999-9999'
+
+/* MISC */
+select * from records where name LIKE '%John%'
+select * from records where name IS NOT null;
