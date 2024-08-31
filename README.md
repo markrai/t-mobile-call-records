@@ -1,4 +1,4 @@
-# csvparser
+# T-Mobile Call Records CSV Parser
 
 Sequentially reads T-Mobile Call and Messaging CSV records, and writes the combined data onto an SQLite database.
 
